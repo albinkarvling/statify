@@ -1,23 +1,28 @@
-# Use the official Node.js 14 image as the base image
-FROM node:14
-
-# Set the working directory inside the container
+FROM node:23-slim AS deps
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Install project dependencies
-RUN npm install
+FROM node:23-slim AS builder
+WORKDIR /app
 
-# Copy the rest of the project files to the working directory
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build the Next.js app
 RUN npm run build
 
-# Expose the port that the Next.js app will run on
+FROM node:23-slim AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
 EXPOSE 3000
 
-# Start the Next.js app
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]

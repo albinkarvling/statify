@@ -31,6 +31,11 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/amd64 \
+            --build-arg NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID }} \
+            --build-arg CLIENT_ID=${{ secrets.CLIENT_ID }} \
+            --build-arg CLIENT_SECRET=${{ secrets.CLIENT_SECRET }} \
+            --build-arg TOKEN_URL=${{ secrets.TOKEN_URL }} \
+            --build-arg SPOTIFY_API_URL=${{ secrets.SPOTIFY_API_URL }} \
             -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/statify/statify:latest \
             --push .
 
